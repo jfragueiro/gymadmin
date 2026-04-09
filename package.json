@@ -1,0 +1,17 @@
+{
+  "name": "gymadmin",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/api",
+    "apps/web",
+    "packages/shared"
+  ],
+  "scripts": {
+    "dev:api": "npm run dev -w apps/api",
+    "dev:web": "npm run dev -w apps/web",
+    "test": "npm run test -w apps/api",
+    "migrate": "npm run migrate -w apps/api",
+    "seed": "npm run seed -w apps/api"
+  }
+}

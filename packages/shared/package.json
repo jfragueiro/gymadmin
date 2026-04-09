@@ -1,0 +1,11 @@
+{
+  "name": "@gymadmin/shared",
+  "version": "1.0.0",
+  "description": "Shared types and constants for GymAdmin",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./constants": "./src/constants/index.js",
+    "./types": "./src/types/index.js"
+  }
+}
