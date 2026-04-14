@@ -66,5 +66,5 @@ Domain ← Application ← Infrastructure ← Adapters
 - Idioma del código: inglés. UI y mensajes de error al usuario: español
 
 ## Referencia completa
-Ver `/Users/joe/Documents/joe/prd/GymAdmin_PRD_v4.0.pdf` para el modelo de datos completo,
+Ver `/Users/joe/Documents/joe/prd/GymAdmin_PRD_v5.0.pdf` para el modelo de datos completo,
 lista de endpoints y especificación de módulos.

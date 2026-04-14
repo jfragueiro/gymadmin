@@ -42,6 +42,13 @@ const QRCheckInUseCase = require('../application/attendance/QRCheckInUseCase');
 const GetClientQRUseCase = require('../application/attendance/GetClientQRUseCase');
 const RegenerateQRTokenUseCase = require('../application/attendance/RegenerateQRTokenUseCase');
 
+const ListUsersUseCase = require('../application/user/ListUsersUseCase');
+const GetUserUseCase = require('../application/user/GetUserUseCase');
+const CreateUserUseCase = require('../application/user/CreateUserUseCase');
+const UpdateUserUseCase = require('../application/user/UpdateUserUseCase');
+const ToggleUserStatusUseCase = require('../application/user/ToggleUserStatusUseCase');
+const UpdateOwnProfileUseCase = require('../application/user/UpdateOwnProfileUseCase');
+
 const LoginUseCase = require('../application/auth/LoginUseCase');
 const RegisterUserUseCase = require('../application/auth/RegisterUserUseCase');
 
@@ -89,6 +96,13 @@ const deleteTrainingPlanUseCase = new DeleteTrainingPlanUseCase({ trainingPlanRe
 const addExerciseUseCase = new AddExerciseUseCase({ trainingPlanRepository });
 const removeExerciseUseCase = new RemoveExerciseUseCase({ trainingPlanRepository });
 
+const listUsersUseCase = new ListUsersUseCase({ userRepository });
+const getUserUseCase = new GetUserUseCase({ userRepository });
+const createUserUseCase = new CreateUserUseCase({ userRepository, passwordHasher });
+const updateUserUseCase = new UpdateUserUseCase({ userRepository });
+const toggleUserStatusUseCase = new ToggleUserStatusUseCase({ userRepository });
+const updateOwnProfileUseCase = new UpdateOwnProfileUseCase({ userRepository, passwordHasher });
+
 const loginUseCase = new LoginUseCase({ userRepository, passwordHasher, tokenService });
 const registerUserUseCase = new RegisterUserUseCase({ userRepository, passwordHasher });
 
@@ -120,6 +134,12 @@ module.exports = {
   deleteTrainingPlanUseCase,
   addExerciseUseCase,
   removeExerciseUseCase,
+  listUsersUseCase,
+  getUserUseCase,
+  createUserUseCase,
+  updateUserUseCase,
+  toggleUserStatusUseCase,
+  updateOwnProfileUseCase,
   loginUseCase,
   registerUserUseCase,
   tokenService,

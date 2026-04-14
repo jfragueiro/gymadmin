@@ -1,7 +1,12 @@
 const ROLES = /** @type {const} */ ({
   ADMIN: 'admin',
-  COACH: 'coach',
+  SUPERVISOR: 'supervisor',
+  PROFESOR: 'profesor',
+  RECEPCIONISTA: 'recepcionista',
+  CAJERO: 'cajero',
 });
+
+const ROLES_LIST = ['admin', 'supervisor', 'profesor', 'recepcionista', 'cajero'];
 
 const CLIENT_STATUS = /** @type {const} */ ({
   ACTIVE: 'active',
@@ -21,4 +26,4 @@ const GENDER = /** @type {const} */ ({
   OTHER: 'other',
 });
 
-module.exports = { ROLES, CLIENT_STATUS, PAYMENT_METHOD, GENDER };
+module.exports = { ROLES, ROLES_LIST, CLIENT_STATUS, PAYMENT_METHOD, GENDER };
