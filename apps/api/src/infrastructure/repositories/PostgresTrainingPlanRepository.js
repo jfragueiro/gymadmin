@@ -113,6 +113,31 @@ class PostgresTrainingPlanRepository {
   async removeExercise(exerciseId) {
     await knex('training_exercises').where({ id: exerciseId }).delete();
   }
+
+  async findActiveByClientId(clientId) {
+    const plan = await knex('training_plans')
+      .where({ client_id: clientId, is_active: true })
+      .orderBy('created_at', 'desc')
+      .first();
+
+    if (!plan) return null;
+
+    const exercises = await knex('training_exercises')
+      .where({ training_plan_id: plan.id })
+      .orderBy([{ column: 'day_label' }, { column: 'order_index' }]);
+
+    const dayMap = {};
+    exercises.forEach((ex) => {
+      const dayName = ex.day_label || '';
+      if (!dayMap[dayName]) dayMap[dayName] = [];
+      dayMap[dayName].push(toExercise(ex));
+    });
+
+    const days = Object.entries(dayMap).map(([dayName, exs]) => ({ dayName, exercises: exs }));
+    const entity = toEntity(plan, exercises.map(toExercise));
+    entity.days = days;
+    return entity;
+  }
 }
 
 module.exports = PostgresTrainingPlanRepository;

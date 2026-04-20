@@ -1,5 +1,5 @@
 class Client {
-  constructor({ id, name, email, phone, birthDate, documentNumber, isActive = true, qrToken, createdAt, updatedAt }) {
+  constructor({ id, name, email, phone, birthDate, documentNumber, isActive = true, qrToken, telegramChatId, telegramLinkedAt, createdAt, updatedAt }) {
     if (!name) throw new Error('Client name is required');
     if (!email) throw new Error('Client email is required');
 
@@ -11,6 +11,8 @@ class Client {
     this.documentNumber = documentNumber || null;
     this.isActive = isActive;
     this.qrToken = qrToken || null;
+    this.telegramChatId = telegramChatId || null;
+    this.telegramLinkedAt = telegramLinkedAt || null;
     this.createdAt = createdAt || null;
     this.updatedAt = updatedAt || null;
   }

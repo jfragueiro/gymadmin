@@ -57,6 +57,29 @@ Domain ← Application ← Infrastructure ← Adapters
 - Validación con React Hook Form + Zod
 - Interceptor Axios adjunta JWT en todas las requests; redirige a /login en 401
 
+## Módulo Telegram (apps/api/src/)
+Bot de notificaciones. Flujo: cliente escribe su DNI → bot lo vincula (guarda telegram_chat_id en clients). Cron job diario a las 7am envía el plan del día.
+
+### Estructura
+- `application/telegram/ports/ITelegramService.js` → puerto abstracto
+- `application/telegram/use-cases/` → SendDailyPlansUseCase, GetDailyPlanUseCase, GetWeeklyPlanUseCase, HandleUnknownCommandUseCase
+- `application/client/LinkTelegramUseCase.js` → vincula DNI ↔ chat_id
+- `infrastructure/services/TelegramBotService.js` → implementa ITelegramService con node-telegram-bot-api (modo webhook)
+- `infrastructure/scheduler.js` → cron job (node-cron) a las 7am en GYM_TIMEZONE
+- `adapters/controllers/TelegramWebhookController.js` → valida X-Telegram-Bot-Api-Secret-Token, rutea por comando
+- `adapters/routes/telegramRoutes.js` → POST /api/v1/telegram/webhook (sin auth JWT)
+
+### Variables de entorno requeridas
+- `TELEGRAM_BOT_TOKEN` → token del bot (@BotFather)
+- `TELEGRAM_WEBHOOK_SECRET` → string aleatorio ≥32 chars para validar el webhook
+- `GYM_TIMEZONE` → zona horaria del cron (ej. America/Buenos_Aires)
+
+### Comandos del bot
+- DNI (6-10 dígitos) → vinculación automática
+- `/plan` → entrenamiento del día actual
+- `/semana` → plan completo de los 7 días
+- Cualquier otro texto → mensaje de ayuda
+
 ## Reglas Globales
 - Knex NUNCA se importa fuera de apps/api/src/infrastructure/
 - Los Use Cases reciben dependencias SOLO por constructor
@@ -66,5 +89,5 @@ Domain ← Application ← Infrastructure ← Adapters
 - Idioma del código: inglés. UI y mensajes de error al usuario: español
 
 ## Referencia completa
-Ver `/Users/joe/Documents/joe/prd/GymAdmin_PRD_v5.0.pdf` para el modelo de datos completo,
+Ver `/Users/joe/Documents/joe/prd/GymAdmin_PRD_v6.0.pdf` para el modelo de datos completo,
 lista de endpoints y especificación de módulos.

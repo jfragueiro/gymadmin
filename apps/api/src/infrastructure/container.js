@@ -1,4 +1,11 @@
 const PostgresClientRepository = require('./repositories/PostgresClientRepository');
+const TelegramBotService = require('./services/TelegramBotService');
+
+const LinkTelegramUseCase = require('../application/client/LinkTelegramUseCase');
+const SendDailyPlansUseCase = require('../application/telegram/use-cases/SendDailyPlansUseCase');
+const GetDailyPlanUseCase = require('../application/telegram/use-cases/GetDailyPlanUseCase');
+const GetWeeklyPlanUseCase = require('../application/telegram/use-cases/GetWeeklyPlanUseCase');
+const HandleUnknownCommandUseCase = require('../application/telegram/use-cases/HandleUnknownCommandUseCase');
 const PostgresPlanRepository = require('./repositories/PostgresPlanRepository');
 const PostgresMembershipRepository = require('./repositories/PostgresMembershipRepository');
 const PostgresUserRepository = require('./repositories/PostgresUserRepository');
@@ -62,6 +69,9 @@ const trainingPlanRepository = new PostgresTrainingPlanRepository();
 const tokenService = new JwtTokenService();
 const passwordHasher = new BcryptPasswordHasher();
 const qrCodeGenerator = new QRCodeGenerator();
+const telegramService = process.env.TELEGRAM_BOT_TOKEN
+  ? new TelegramBotService(process.env.TELEGRAM_BOT_TOKEN)
+  : null;
 
 const registerClientUseCase = new RegisterClientUseCase({ clientRepository });
 const getClientUseCase = new GetClientUseCase({ clientRepository });
@@ -106,6 +116,12 @@ const updateOwnProfileUseCase = new UpdateOwnProfileUseCase({ userRepository, pa
 const loginUseCase = new LoginUseCase({ userRepository, passwordHasher, tokenService });
 const registerUserUseCase = new RegisterUserUseCase({ userRepository, passwordHasher });
 
+const linkTelegramUseCase = new LinkTelegramUseCase({ clientRepository, telegramService });
+const sendDailyPlansUseCase = new SendDailyPlansUseCase({ clientRepository, trainingPlanRepository, telegramService });
+const getDailyPlanUseCase = new GetDailyPlanUseCase({ clientRepository, trainingPlanRepository, telegramService });
+const getWeeklyPlanUseCase = new GetWeeklyPlanUseCase({ clientRepository, trainingPlanRepository, telegramService });
+const handleUnknownCommandUseCase = new HandleUnknownCommandUseCase({ telegramService });
+
 module.exports = {
   registerClientUseCase,
   getClientUseCase,
@@ -143,4 +159,10 @@ module.exports = {
   loginUseCase,
   registerUserUseCase,
   tokenService,
+  telegramService,
+  linkTelegramUseCase,
+  sendDailyPlansUseCase,
+  getDailyPlanUseCase,
+  getWeeklyPlanUseCase,
+  handleUnknownCommandUseCase,
 };

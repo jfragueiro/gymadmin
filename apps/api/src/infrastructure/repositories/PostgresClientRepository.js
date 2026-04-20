@@ -11,6 +11,8 @@ function toEntity(row) {
     documentNumber: row.document_number,
     isActive: row.is_active,
     qrToken: row.qr_token,
+    telegramChatId: row.telegram_chat_id ? String(row.telegram_chat_id) : null,
+    telegramLinkedAt: row.telegram_linked_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   });
@@ -88,6 +90,29 @@ class PostgresClientRepository {
       .update({ qr_token: knex.raw('gen_random_uuid()'), updated_at: knex.fn.now() })
       .returning('qr_token');
     return qr_token;
+  }
+
+  async findByDocumentNumber(documentNumber) {
+    const row = await knex('clients').where({ document_number: documentNumber }).first();
+    return row ? toEntity(row) : null;
+  }
+
+  async saveTelegramChatId(clientId, chatId) {
+    await knex('clients')
+      .where({ id: clientId })
+      .update({ telegram_chat_id: chatId, telegram_linked_at: knex.fn.now(), updated_at: knex.fn.now() });
+  }
+
+  async findActiveWithTelegram() {
+    const rows = await knex('clients')
+      .whereNotNull('telegram_chat_id')
+      .where({ is_active: true });
+    return rows.map(toEntity);
+  }
+
+  async findByTelegramChatId(chatId) {
+    const row = await knex('clients').where({ telegram_chat_id: chatId }).first();
+    return row ? toEntity(row) : null;
   }
 }
 

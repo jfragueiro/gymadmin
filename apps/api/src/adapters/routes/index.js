@@ -10,6 +10,7 @@ const userRoutes = require('./userRoutes');
 const trainingPlanRoutes = require('./trainingPlanRoutes');
 const trainingPlanController = require('../controllers/TrainingPlanController');
 const authMiddleware = require('../middleware/authMiddleware');
+const telegramRoutes = require('./telegramRoutes');
 
 const router = Router();
 
@@ -25,5 +26,6 @@ router.use('/payments', paymentRoutes);
 router.use('/users', userRoutes);
 router.use('/training-plans', trainingPlanRoutes);
 router.use('/', qrRoutes);
+router.use('/telegram', telegramRoutes);
 
 module.exports = router;
