@@ -78,6 +78,42 @@ class PostgresAttendanceRepository {
       .first();
     return row ? toEntity(row) : null;
   }
+
+  async countUniqueVisitors(startDate, endDate) {
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    const [{ count }] = await knex('attendance')
+      .whereBetween('checked_in_at', [start, end])
+      .countDistinct('client_id as count');
+    return Number(count);
+  }
+
+  async getCheckInsPerClient(startDate, endDate) {
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    const rows = await knex('attendance')
+      .join('clients', 'attendance.client_id', 'clients.id')
+      .whereBetween('attendance.checked_in_at', [start, end])
+      .groupBy('attendance.client_id', 'clients.name')
+      .select(
+        'attendance.client_id',
+        'clients.name as client_name',
+        knex.raw('COUNT(*) as total')
+      )
+      .orderBy('total', 'desc');
+
+    return rows.map((r) => ({
+      clientId: r.client_id,
+      clientName: r.client_name,
+      total: Number(r.total),
+    }));
+  }
 }
 
 module.exports = PostgresAttendanceRepository;

@@ -8,6 +8,7 @@ const paymentRoutes = require('./paymentRoutes');
 const qrRoutes = require('./qrRoutes');
 const userRoutes = require('./userRoutes');
 const trainingPlanRoutes = require('./trainingPlanRoutes');
+const gymMetricsRoutes = require('./gymMetricsRoutes');
 const trainingPlanController = require('../controllers/TrainingPlanController');
 const authMiddleware = require('../middleware/authMiddleware');
 const telegramRoutes = require('./telegramRoutes');
@@ -25,7 +26,8 @@ router.use('/attendance', attendanceRoutes);
 router.use('/payments', paymentRoutes);
 router.use('/users', userRoutes);
 router.use('/training-plans', trainingPlanRoutes);
-router.use('/', qrRoutes);
+router.use('/gym-metrics', gymMetricsRoutes);
 router.use('/telegram', telegramRoutes);
+router.use('/', qrRoutes);
 
 module.exports = router;

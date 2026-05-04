@@ -56,6 +56,8 @@ const UpdateUserUseCase = require('../application/user/UpdateUserUseCase');
 const ToggleUserStatusUseCase = require('../application/user/ToggleUserStatusUseCase');
 const UpdateOwnProfileUseCase = require('../application/user/UpdateOwnProfileUseCase');
 
+const GetGymMetricsUseCase = require('../application/gymMetrics/GetGymMetricsUseCase');
+
 const LoginUseCase = require('../application/auth/LoginUseCase');
 const RegisterUserUseCase = require('../application/auth/RegisterUserUseCase');
 
@@ -113,14 +115,18 @@ const updateUserUseCase = new UpdateUserUseCase({ userRepository });
 const toggleUserStatusUseCase = new ToggleUserStatusUseCase({ userRepository });
 const updateOwnProfileUseCase = new UpdateOwnProfileUseCase({ userRepository, passwordHasher });
 
+const getGymMetricsUseCase = new GetGymMetricsUseCase({ attendanceRepository, clientRepository });
+
 const loginUseCase = new LoginUseCase({ userRepository, passwordHasher, tokenService });
 const registerUserUseCase = new RegisterUserUseCase({ userRepository, passwordHasher });
+
 
 const linkTelegramUseCase = new LinkTelegramUseCase({ clientRepository, telegramService });
 const sendDailyPlansUseCase = new SendDailyPlansUseCase({ clientRepository, trainingPlanRepository, telegramService });
 const getDailyPlanUseCase = new GetDailyPlanUseCase({ clientRepository, trainingPlanRepository, telegramService });
 const getWeeklyPlanUseCase = new GetWeeklyPlanUseCase({ clientRepository, trainingPlanRepository, telegramService });
 const handleUnknownCommandUseCase = new HandleUnknownCommandUseCase({ telegramService });
+
 
 module.exports = {
   registerClientUseCase,
@@ -156,9 +162,11 @@ module.exports = {
   updateUserUseCase,
   toggleUserStatusUseCase,
   updateOwnProfileUseCase,
+  getGymMetricsUseCase,
   loginUseCase,
   registerUserUseCase,
   tokenService,
+  
   telegramService,
   linkTelegramUseCase,
   sendDailyPlansUseCase,

@@ -13,6 +13,7 @@ import AttendancePage from '../pages/Attendance/AttendancePage.jsx';
 import MembershipsPage from '../pages/Memberships/MembershipsPage.jsx';
 import MembershipPlansPage from '../pages/MembershipPlans/MembershipPlansPage.jsx';
 import MetricsPage from '../pages/Metrics/MetricsPage.jsx';
+import GymMetricsPage from '../pages/GymMetrics/GymMetricsPage.jsx';
 import TrainingPlansPage from '../pages/TrainingPlans/TrainingPlansPage.jsx';
 import UsersPage from '../pages/Users/UsersPage.jsx';
 import MyProfilePage from '../pages/MyProfile/MyProfilePage.jsx';
@@ -34,6 +35,7 @@ const router = createBrowserRouter([
       { path: '/memberships',               element: <MembershipsPage /> },
       { path: '/membership-plans',          element: <MembershipPlansPage /> },
       { path: '/metrics/:clientId',         element: <MetricsPage /> },
+      { path: '/gym-metrics',               element: <GymMetricsPage /> },
       { path: '/training-plans/:clientId',  element: <TrainingPlansPage /> },
       { path: '/users',                     element: <ProtectedRoute module="users" required="full"><UsersPage /></ProtectedRoute> },
       { path: '/my-profile',                element: <MyProfilePage /> },
