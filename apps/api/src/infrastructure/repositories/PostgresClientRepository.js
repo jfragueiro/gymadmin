@@ -92,6 +92,7 @@ class PostgresClientRepository {
     return qr_token;
   }
 
+  
   async findByDocumentNumber(documentNumber) {
     const row = await knex('clients').where({ document_number: documentNumber }).first();
     return row ? toEntity(row) : null;
@@ -113,6 +114,18 @@ class PostgresClientRepository {
   async findByTelegramChatId(chatId) {
     const row = await knex('clients').where({ telegram_chat_id: chatId }).first();
     return row ? toEntity(row) : null;
+  }
+  
+  async countRegisteredInPeriod(startDate, endDate) {
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    const [{ count }] = await knex('clients')
+      .whereBetween('created_at', [start, end])
+      .count('id as count');
+    return Number(count);
   }
 }
 
