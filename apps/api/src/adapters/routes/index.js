@@ -8,6 +8,7 @@ const paymentRoutes = require('./paymentRoutes');
 const qrRoutes = require('./qrRoutes');
 const userRoutes = require('./userRoutes');
 const trainingPlanRoutes = require('./trainingPlanRoutes');
+const financesRoutes = require('./financesRoutes');
 const trainingPlanController = require('../controllers/TrainingPlanController');
 const authMiddleware = require('../middleware/authMiddleware');
 const telegramRoutes = require('./telegramRoutes');
@@ -25,6 +26,7 @@ router.use('/attendance', attendanceRoutes);
 router.use('/payments', paymentRoutes);
 router.use('/users', userRoutes);
 router.use('/training-plans', trainingPlanRoutes);
+router.use('/finances', financesRoutes);
 router.use('/', qrRoutes);
 router.use('/telegram', telegramRoutes);
 

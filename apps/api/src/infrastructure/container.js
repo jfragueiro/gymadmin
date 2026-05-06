@@ -59,6 +59,14 @@ const UpdateOwnProfileUseCase = require('../application/user/UpdateOwnProfileUse
 const LoginUseCase = require('../application/auth/LoginUseCase');
 const RegisterUserUseCase = require('../application/auth/RegisterUserUseCase');
 
+const PostgresExpenseCategoryRepository = require('./repositories/PostgresExpenseCategoryRepository');
+const PostgresExpenseEntryRepository = require('./repositories/PostgresExpenseEntryRepository');
+const GetFinancialSummaryUseCase = require('../application/finances/GetFinancialSummaryUseCase');
+const GetCategoryEntriesUseCase = require('../application/finances/GetCategoryEntriesUseCase');
+const AddExpenseCategoryUseCase = require('../application/finances/AddExpenseCategoryUseCase');
+const AddExpenseEntryUseCase = require('../application/finances/AddExpenseEntryUseCase');
+const DeleteExpenseEntryUseCase = require('../application/finances/DeleteExpenseEntryUseCase');
+
 const clientRepository = new PostgresClientRepository();
 const planRepository = new PostgresPlanRepository();
 const membershipRepository = new PostgresMembershipRepository();
@@ -116,6 +124,14 @@ const updateOwnProfileUseCase = new UpdateOwnProfileUseCase({ userRepository, pa
 const loginUseCase = new LoginUseCase({ userRepository, passwordHasher, tokenService });
 const registerUserUseCase = new RegisterUserUseCase({ userRepository, passwordHasher });
 
+const categoryRepository = new PostgresExpenseCategoryRepository();
+const entryRepository = new PostgresExpenseEntryRepository();
+const getFinancialSummaryUseCase = new GetFinancialSummaryUseCase({ categoryRepository, entryRepository });
+const getCategoryEntriesUseCase = new GetCategoryEntriesUseCase({ categoryRepository, entryRepository });
+const addExpenseCategoryUseCase = new AddExpenseCategoryUseCase({ categoryRepository });
+const addExpenseEntryUseCase = new AddExpenseEntryUseCase({ categoryRepository, entryRepository });
+const deleteExpenseEntryUseCase = new DeleteExpenseEntryUseCase({ entryRepository });
+
 const linkTelegramUseCase = new LinkTelegramUseCase({ clientRepository, telegramService });
 const sendDailyPlansUseCase = new SendDailyPlansUseCase({ clientRepository, trainingPlanRepository, telegramService });
 const getDailyPlanUseCase = new GetDailyPlanUseCase({ clientRepository, trainingPlanRepository, telegramService });
@@ -165,4 +181,9 @@ module.exports = {
   getDailyPlanUseCase,
   getWeeklyPlanUseCase,
   handleUnknownCommandUseCase,
+  getFinancialSummaryUseCase,
+  getCategoryEntriesUseCase,
+  addExpenseCategoryUseCase,
+  addExpenseEntryUseCase,
+  deleteExpenseEntryUseCase,
 };

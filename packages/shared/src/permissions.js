@@ -10,6 +10,7 @@ const PERMISSIONS = {
     users: 'full',
     reports: 'full',
     config: 'full',
+    finances: 'full',
   },
   supervisor: {
     clients: 'full',
@@ -22,6 +23,7 @@ const PERMISSIONS = {
     users: '-',
     reports: 'full',
     config: '-',
+    finances: 'read',
   },
   profesor: {
     clients: 'full',
@@ -34,6 +36,7 @@ const PERMISSIONS = {
     users: '-',
     reports: 'read',
     config: '-',
+    finances: '-',
   },
   recepcionista: {
     clients: 'read',
@@ -46,6 +49,7 @@ const PERMISSIONS = {
     users: '-',
     reports: 'read',
     config: '-',
+    finances: '-',
   },
   cajero: {
     clients: '-',
@@ -58,6 +62,7 @@ const PERMISSIONS = {
     users: '-',
     reports: '-',
     config: '-',
+    finances: '-',
   },
 };
 

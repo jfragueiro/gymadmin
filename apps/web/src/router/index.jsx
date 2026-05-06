@@ -16,6 +16,8 @@ import MetricsPage from '../pages/Metrics/MetricsPage.jsx';
 import TrainingPlansPage from '../pages/TrainingPlans/TrainingPlansPage.jsx';
 import UsersPage from '../pages/Users/UsersPage.jsx';
 import MyProfilePage from '../pages/MyProfile/MyProfilePage.jsx';
+import FinancesPage from '../pages/Finances/FinancesPage.jsx';
+import FinanceDetailPage from '../pages/Finances/FinanceDetailPage.jsx';
 
 const router = createBrowserRouter([
   { path: '/login',            element: <LoginPage /> },
@@ -37,6 +39,8 @@ const router = createBrowserRouter([
       { path: '/training-plans/:clientId',  element: <TrainingPlansPage /> },
       { path: '/users',                     element: <ProtectedRoute module="users" required="full"><UsersPage /></ProtectedRoute> },
       { path: '/my-profile',                element: <MyProfilePage /> },
+      { path: '/finances',                  element: <ProtectedRoute module="finances" required="read"><FinancesPage /></ProtectedRoute> },
+      { path: '/finances/:categoryId',      element: <ProtectedRoute module="finances" required="read"><FinanceDetailPage /></ProtectedRoute> },
     ],
   },
 ]);
