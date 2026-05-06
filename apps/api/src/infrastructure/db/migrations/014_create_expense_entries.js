@@ -5,7 +5,6 @@ exports.up = function (knex) {
     table.string('month', 7).notNullable(); // YYYY-MM
     table.string('label').notNullable();
     table.decimal('amount', 12, 2).notNullable();
-    table.integer('created_by').nullable().references('id').inTable('users').onDelete('SET NULL');
     table.timestamps(true, true);
   });
 };

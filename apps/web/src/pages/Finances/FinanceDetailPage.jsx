@@ -96,10 +96,10 @@ export default function FinanceDetailPage() {
 
   return (
     <div className="p-6 space-y-6 max-w-3xl mx-auto">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <button
           onClick={() => navigate('/finances')}
-          className="text-gray-400 hover:text-gray-600 text-sm"
+          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
         >
           ← Volver
         </button>

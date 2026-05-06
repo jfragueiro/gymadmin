@@ -1,4 +1,4 @@
-import apiClient from './apiClient.js';
+import apiClient from './axios.js';
 
 const financesApi = {
   getSummary: (year) =>
