@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { to: '/memberships',      label: 'Membresías',    module: 'memberships' },
   { to: '/membership-plans', label: 'Planes',        module: 'memberships' },
   { to: '/finances',         label: 'Costos',        module: 'finances' },
+  { to: '/gym-metrics',      label: 'Métricas',      module: 'reports' },
   { to: '/users',            label: 'Usuarios',      module: 'users', required: 'full' },
 ];
 

@@ -7,7 +7,7 @@ exports.seed = async function (knex) {
 
   await knex('users').insert([
     {
-      email: 'postgres',
+      email: 'admin@gymadmin.com',
       password_hash: passwordHash,
       role: 'admin',
       is_active: true,

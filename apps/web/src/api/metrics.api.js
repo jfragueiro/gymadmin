@@ -5,6 +5,8 @@ const metricsApi = {
     apiClient.get(`/clients/${clientId}/metrics`).then((r) => r.data),
   create: (clientId, data) =>
     apiClient.post(`/clients/${clientId}/metrics`, data).then((r) => r.data),
+  getGymMetrics: (startDate, endDate) =>
+    apiClient.get('/gym-metrics', { params: { startDate, endDate } }).then((r) => r.data),
 };
 
 export default metricsApi;
