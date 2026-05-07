@@ -1,4 +1,5 @@
 const Client = require('../../domain/client/Client');
+const ClientAlreadyExistsError = require('../../domain/client/ClientAlreadyExistsError');
 
 class RegisterClientUseCase {
   constructor({ clientRepository }) {
@@ -6,12 +7,13 @@ class RegisterClientUseCase {
   }
 
   async execute({ name, email, phone, birthDate, documentNumber }) {
-    const existing = await this.clientRepository.findByEmail(email);
-    if (existing) {
-      const err = new Error(`A client with email ${email} already exists`);
-      err.statusCode = 409;
-      throw err;
-    }
+    const [existingEmail, existingDni] = await Promise.all([
+      this.clientRepository.findByEmail(email),
+      this.clientRepository.findByDocumentNumber(documentNumber),
+    ]);
+
+    if (existingEmail) throw new ClientAlreadyExistsError('email');
+    if (existingDni) throw new ClientAlreadyExistsError('documento');
 
     const client = Client.create({ name, email, phone, birthDate, documentNumber });
     await this.clientRepository.save(client);

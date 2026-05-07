@@ -34,8 +34,8 @@ export default function ClientFormModal({ onClose }) {
           <Field label="Email" error={errors.email}>
             <input {...register('email')} type="email" className={input(errors.email)} placeholder="juan@email.com" />
           </Field>
-          <Field label="Número de documento" error={errors.documentNumber}>
-            <input {...register('documentNumber')} className={input()} placeholder="DNI / Cédula / Pasaporte" />
+          <Field label="Número de documento *" error={errors.documentNumber}>
+            <input {...register('documentNumber')} className={input(errors.documentNumber)} placeholder="DNI / Cédula / Pasaporte" />
           </Field>
           <Field label="Teléfono" error={errors.phone}>
             <input {...register('phone')} className={input()} placeholder="555-0000" />
@@ -45,7 +45,9 @@ export default function ClientFormModal({ onClose }) {
           </Field>
 
           {error && (
-            <p className="text-red-500 text-sm">Error al registrar cliente</p>
+            <p className="text-red-500 text-sm">
+              {error?.response?.data?.message || 'Error al registrar cliente'}
+            </p>
           )}
 
           <div className="flex justify-end gap-3 pt-2">
