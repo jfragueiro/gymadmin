@@ -5,7 +5,7 @@ const registerClientSchema = z.object({
   email: z.string().email(),
   phone: z.string().optional(),
   birthDate: z.string().optional(),
-  documentNumber: z.string().optional(),
+  documentNumber: z.string().min(6, 'El documento debe tener al menos 6 caracteres'),
 });
 
 const updateClientSchema = z.object({

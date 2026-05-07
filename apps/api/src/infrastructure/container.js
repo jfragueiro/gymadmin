@@ -102,7 +102,7 @@ const getClientsWithMembershipUseCase = new GetClientsWithMembershipUseCase({ me
 const registerPaymentUseCase = new RegisterPaymentUseCase({ paymentRepository, membershipRepository, clientRepository });
 const getClientPaymentsUseCase = new GetClientPaymentsUseCase({ paymentRepository, clientRepository });
 
-const checkInUseCase = new CheckInUseCase({ attendanceRepository, clientRepository });
+const checkInUseCase = new CheckInUseCase({ attendanceRepository, clientRepository, membershipRepository });
 const getDailyAttendanceUseCase = new GetDailyAttendanceUseCase({ attendanceRepository });
 const getClientAttendanceUseCase = new GetClientAttendanceUseCase({ attendanceRepository, clientRepository });
 const qrCheckInUseCase = new QRCheckInUseCase({ clientRepository, membershipRepository, attendanceRepository });

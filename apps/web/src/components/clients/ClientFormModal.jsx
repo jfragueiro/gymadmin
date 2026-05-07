@@ -8,7 +8,7 @@ const schema = z.object({
   email: z.string().email('Email inválido'),
   phone: z.string().optional(),
   birthDate: z.string().optional(),
-  documentNumber: z.string().optional(),
+  documentNumber: z.string().min(6, 'El documento es obligatorio (mín. 6 caracteres)'),
 });
 
 export default function ClientFormModal({ onClose }) {
