@@ -5,10 +5,10 @@ import { useRegisterClient } from '../../hooks/useClients.js';
 
 const schema = z.object({
   name: z.string().min(2, 'Nombre requerido'),
-  email: z.string().email('Email inválido'),
+  email: z.string().min(1, 'El email es obligatorio').email('Email inválido'),
+  documentNumber: z.string().min(1, 'El documento es obligatorio').min(6, 'Mínimo 6 caracteres'),
   phone: z.string().optional(),
   birthDate: z.string().optional(),
-  documentNumber: z.string().min(6, 'El documento es obligatorio (mín. 6 caracteres)'),
 });
 
 export default function ClientFormModal({ onClose }) {
@@ -16,8 +16,14 @@ export default function ClientFormModal({ onClose }) {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
-  } = useForm({ resolver: zodResolver(schema) });
+  } = useForm({ resolver: zodResolver(schema), mode: 'onTouched' });
+
+  const [name, email, documentNumber] = watch(['name', 'email', 'documentNumber']);
+  const canSubmit = (name?.length ?? 0) >= 2 &&
+                    (email?.length ?? 0) >= 1 &&
+                    (documentNumber?.length ?? 0) >= 6;
 
   const onSubmit = (data) => {
     mutate(data, { onSuccess: onClose });
@@ -28,13 +34,13 @@ export default function ClientFormModal({ onClose }) {
       <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-5">Nuevo Cliente</h2>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Field label="Nombre completo" error={errors.name}>
+          <Field label="Nombre completo" required error={errors.name}>
             <input {...register('name')} className={input(errors.name)} placeholder="Juan Pérez" />
           </Field>
-          <Field label="Email" error={errors.email}>
+          <Field label="Email" required error={errors.email}>
             <input {...register('email')} type="email" className={input(errors.email)} placeholder="juan@email.com" />
           </Field>
-          <Field label="Número de documento *" error={errors.documentNumber}>
+          <Field label="Número de documento" required error={errors.documentNumber}>
             <input {...register('documentNumber')} className={input(errors.documentNumber)} placeholder="DNI / Cédula / Pasaporte" />
           </Field>
           <Field label="Teléfono" error={errors.phone}>
@@ -46,7 +52,7 @@ export default function ClientFormModal({ onClose }) {
 
           {error && (
             <p className="text-red-500 text-sm">
-              {error?.response?.data?.message || 'Error al registrar cliente'}
+              {error?.response?.data?.error || 'Error al registrar cliente'}
             </p>
           )}
 
@@ -56,8 +62,12 @@ export default function ClientFormModal({ onClose }) {
             </button>
             <button
               type="submit"
-              disabled={isPending}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              disabled={!canSubmit || isPending}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                canSubmit && !isPending
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
             >
               {isPending ? 'Guardando...' : 'Guardar'}
             </button>
@@ -68,10 +78,13 @@ export default function ClientFormModal({ onClose }) {
   );
 }
 
-function Field({ label, error, children }) {
+function Field({ label, required, error, children }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+        {required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
       {children}
       {error && <p className="text-red-500 text-xs mt-1">{error.message}</p>}
     </div>
