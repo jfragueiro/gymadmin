@@ -69,6 +69,11 @@ const AddExpenseCategoryUseCase = require('../application/finances/AddExpenseCat
 const AddExpenseEntryUseCase = require('../application/finances/AddExpenseEntryUseCase');
 const DeleteExpenseEntryUseCase = require('../application/finances/DeleteExpenseEntryUseCase');
 
+const PostgresQRSessionRepository = require('./repositories/PostgresQRSessionRepository');
+const RequestQRSessionUseCase = require('../application/qrSession/RequestQRSessionUseCase');
+const ValidateQRSessionUseCase = require('../application/qrSession/ValidateQRSessionUseCase');
+const GetQRSessionStatusUseCase = require('../application/qrSession/GetQRSessionStatusUseCase');
+
 const clientRepository = new PostgresClientRepository();
 const planRepository = new PostgresPlanRepository();
 const membershipRepository = new PostgresMembershipRepository();
@@ -136,6 +141,11 @@ const addExpenseCategoryUseCase = new AddExpenseCategoryUseCase({ categoryReposi
 const addExpenseEntryUseCase = new AddExpenseEntryUseCase({ categoryRepository, entryRepository });
 const deleteExpenseEntryUseCase = new DeleteExpenseEntryUseCase({ entryRepository });
 
+const qrSessionRepository = new PostgresQRSessionRepository();
+const requestQRSessionUseCase = new RequestQRSessionUseCase({ clientRepository, membershipRepository, attendanceRepository, qrSessionRepository });
+const validateQRSessionUseCase = new ValidateQRSessionUseCase({ qrSessionRepository, attendanceRepository, clientRepository });
+const getQRSessionStatusUseCase = new GetQRSessionStatusUseCase({ qrSessionRepository });
+
 const linkTelegramUseCase = new LinkTelegramUseCase({ clientRepository, telegramService });
 const sendDailyPlansUseCase = new SendDailyPlansUseCase({ clientRepository, trainingPlanRepository, telegramService });
 const getDailyPlanUseCase = new GetDailyPlanUseCase({ clientRepository, trainingPlanRepository, telegramService });
@@ -192,4 +202,7 @@ module.exports = {
   addExpenseCategoryUseCase,
   addExpenseEntryUseCase,
   deleteExpenseEntryUseCase,
+  requestQRSessionUseCase,
+  validateQRSessionUseCase,
+  getQRSessionStatusUseCase,
 };

@@ -5,6 +5,8 @@ import LoginPage from '../pages/Login/LoginPage.jsx';
 import QRCheckInPage from '../pages/QRCheckIn/QRCheckInPage.jsx';
 import MiQRPage from '../pages/MiQR/MiQRPage.jsx';
 import CheckInKioskPage from '../pages/CheckInKiosk/CheckInKioskPage.jsx';
+import KioscoPage from '../pages/Kiosco/KioscoPage.jsx';
+import KioscoScanPage from '../pages/Kiosco/KioscoScanPage.jsx';
 import UnauthorizedPage from '../pages/Unauthorized/UnauthorizedPage.jsx';
 
 import ClientsPage from '../pages/Clients/ClientsPage.jsx';
@@ -22,9 +24,11 @@ import FinanceDetailPage from '../pages/Finances/FinanceDetailPage.jsx';
 
 const router = createBrowserRouter([
   { path: '/login',            element: <LoginPage /> },
-  { path: '/check-in/:token',  element: <QRCheckInPage /> },
-  { path: '/mi-qr/:token',     element: <MiQRPage /> },
-  { path: '/kiosk',            element: <CheckInKioskPage /> },
+  { path: '/check-in/:token',   element: <QRCheckInPage /> },
+  { path: '/mi-qr/:token',      element: <MiQRPage /> },
+  { path: '/kiosk',             element: <CheckInKioskPage /> },
+  { path: '/kiosco',            element: <KioscoPage /> },
+  { path: '/kiosco-scan/:token', element: <KioscoScanPage /> },
   { path: '/unauthorized',     element: <UnauthorizedPage /> },
 
   {
