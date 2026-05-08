@@ -1,7 +1,25 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useUsers, useCreateUser, useUpdateUser, useToggleUserStatus } from '../../hooks/useUsers.js';
 import { formatDate } from '../../utils/formatters.js';
 import useAuthStore from '../../store/authStore.js';
+
+const ROLE_VALUES = ['admin', 'supervisor', 'profesor', 'recepcionista', 'cajero'];
+
+const createUserSchema = z.object({
+  name: z.string().min(1, 'El nombre es obligatorio').max(100),
+  email: z.string().min(1, 'El email es obligatorio').email('Email inválido'),
+  password: z.string().min(6, 'Mínimo 6 caracteres').max(100),
+  role: z.enum(ROLE_VALUES, { errorMap: () => ({ message: 'Rol inválido' }) }),
+});
+
+const updateUserSchema = z.object({
+  name: z.string().min(1, 'El nombre es obligatorio').max(100),
+  email: z.string().min(1, 'El email es obligatorio').email('Email inválido'),
+  role: z.enum(ROLE_VALUES, { errorMap: () => ({ message: 'Rol inválido' }) }).optional(),
+});
 
 const ROLES = [
   { value: 'admin',         label: 'Administrador' },
@@ -149,28 +167,31 @@ function UserFormModal({ mode, user, currentUserId, onClose }) {
   const { mutate: create, isPending: creating, error: createError } = useCreateUser();
   const { mutate: update, isPending: updating, error: updateError } = useUpdateUser();
   const isPending = creating || updating;
-  const error = createError || updateError;
-
-  const [form, setForm] = useState({
-    name: user?.name ?? '',
-    email: user?.email ?? '',
-    password: '',
-    role: user?.role ?? 'recepcionista',
-  });
-
-  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+  const apiError = createError || updateError;
   const isSelf = user?.id === currentUserId;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const schema = mode === 'create' ? createUserSchema : updateUserSchema;
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      name: user?.name ?? '',
+      email: user?.email ?? '',
+      password: '',
+      role: user?.role ?? 'recepcionista',
+    },
+  });
+
+  const onSubmit = (data) => {
     if (mode === 'create') {
-      create(form, { onSuccess: onClose });
+      create(data, { onSuccess: onClose });
     } else {
-      const data = { id: user.id, name: form.name, email: form.email };
-      if (!isSelf) data.role = form.role;
-      update(data, { onSuccess: onClose });
+      const payload = { id: user.id, name: data.name, email: data.email };
+      if (!isSelf) payload.role = data.role;
+      update(payload, { onSuccess: onClose });
     }
   };
+
+  const cls = (err) => `w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${err ? 'border-red-400' : 'border-gray-300'}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -181,25 +202,20 @@ function UserFormModal({ mode, user, currentUserId, onClose }) {
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Field label="Nombre completo">
-            <input value={form.name} onChange={set('name')} required className={inputCls()} placeholder="Juan Pérez" />
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <Field label="Nombre completo" required error={errors.name}>
+            <input {...register('name')} className={cls(errors.name)} placeholder="Juan Pérez" />
           </Field>
-          <Field label="Email">
-            <input value={form.email} onChange={set('email')} type="email" required className={inputCls()} placeholder="juan@gym.com" />
+          <Field label="Email" required error={errors.email}>
+            <input {...register('email')} type="email" className={cls(errors.email)} placeholder="juan@gym.com" />
           </Field>
           {mode === 'create' && (
-            <Field label="Contraseña temporal">
-              <input value={form.password} onChange={set('password')} type="password" required minLength={6} className={inputCls()} placeholder="Mínimo 6 caracteres" />
+            <Field label="Contraseña temporal" required error={errors.password}>
+              <input {...register('password')} type="password" className={cls(errors.password)} placeholder="Mínimo 6 caracteres" />
             </Field>
           )}
-          <Field label="Rol">
-            <select
-              value={form.role}
-              onChange={set('role')}
-              disabled={isSelf}
-              className={`${inputCls()} disabled:opacity-50`}
-            >
+          <Field label="Rol" error={errors.role}>
+            <select {...register('role')} disabled={isSelf} className={`${cls(errors.role)} disabled:opacity-50`}>
               {ROLES.map((r) => (
                 <option key={r.value} value={r.value}>{r.label}</option>
               ))}
@@ -207,7 +223,11 @@ function UserFormModal({ mode, user, currentUserId, onClose }) {
             {isSelf && <p className="text-xs text-gray-400 mt-1">No puedes cambiar tu propio rol</p>}
           </Field>
 
-          {error && <p className="text-red-500 text-sm">Error al guardar usuario</p>}
+          {apiError && (
+            <p className="text-red-500 text-sm">
+              {apiError?.response?.data?.error || 'Error al guardar usuario'}
+            </p>
+          )}
 
           <div className="flex justify-end gap-3 pt-1">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">
@@ -223,11 +243,14 @@ function UserFormModal({ mode, user, currentUserId, onClose }) {
   );
 }
 
-function Field({ label, children }) {
+function Field({ label, required, error, children }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
       {children}
+      {error && <p className="text-red-500 text-xs mt-1">{error.message}</p>}
     </div>
   );
 }

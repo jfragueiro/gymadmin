@@ -3,7 +3,8 @@ const { registerPaymentUseCase, getClientPaymentsUseCase } = require('../../infr
 class PaymentController {
   async register(req, res, next) {
     try {
-      const payment = await registerPaymentUseCase.execute(req.body);
+      const { clientId, membershipId, amount, method, paymentDate, reference, notes } = req.body;
+      const payment = await registerPaymentUseCase.execute({ clientId, membershipId, amount, method, paymentDate, reference, notes });
       res.status(201).json(payment);
     } catch (err) {
       next(err);

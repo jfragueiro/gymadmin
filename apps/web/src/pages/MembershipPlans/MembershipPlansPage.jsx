@@ -1,6 +1,16 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { usePlans, useCreatePlan, useUpdatePlan, useDeletePlan } from '../../hooks/usePlans.js';
 import { formatCurrency } from '../../utils/formatters.js';
+
+const planSchema = z.object({
+  name: z.string().min(1, 'El nombre es obligatorio').max(100),
+  description: z.string().max(500).optional(),
+  price: z.coerce.number().positive('Debe ser mayor a 0').max(999999),
+  durationDays: z.coerce.number().int().min(1, 'Mínimo 1 día').max(3650),
+});
 
 export default function MembershipPlansPage() {
   const [modal, setModal] = useState(null); // null | { mode: 'create' } | { mode: 'edit', plan }
@@ -118,40 +128,22 @@ export default function MembershipPlansPage() {
 }
 
 function PlanFormModal({ mode, plan, onClose }) {
-  const [form, setForm] = useState({
-    name: plan?.name ?? '',
-    description: plan?.description ?? '',
-    price: plan?.price ?? '',
-    durationDays: plan?.durationDays ?? '',
-  });
-  const [errors, setErrors] = useState({});
-
   const { mutate: create, isPending: creating } = useCreatePlan();
   const { mutate: update, isPending: updating } = useUpdatePlan();
   const isPending = creating || updating;
 
-  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(planSchema),
+    defaultValues: {
+      name: plan?.name ?? '',
+      description: plan?.description ?? '',
+      price: plan?.price ?? '',
+      durationDays: plan?.durationDays ?? '',
+    },
+  });
 
-  const validate = () => {
-    const errs = {};
-    if (!form.name.trim()) errs.name = 'Requerido';
-    if (!form.price || Number(form.price) <= 0) errs.price = 'Debe ser mayor a 0';
-    if (!form.durationDays || Number(form.durationDays) < 1) errs.durationDays = 'Mínimo 1 día';
-    return errs;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); return; }
-
-    const payload = {
-      name: form.name.trim(),
-      description: form.description.trim() || undefined,
-      price: parseFloat(form.price),
-      durationDays: parseInt(form.durationDays),
-    };
-
+  const onSubmit = (data) => {
+    const payload = { ...data, description: data.description || undefined };
     if (mode === 'create') {
       create(payload, { onSuccess: onClose });
     } else {
@@ -165,11 +157,10 @@ function PlanFormModal({ mode, plan, onClose }) {
         <h2 className="text-lg font-semibold text-gray-900 mb-5">
           {mode === 'create' ? 'Nuevo Plan' : 'Editar Plan'}
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Field label="Nombre del plan" error={errors.name}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <Field label="Nombre del plan" required error={errors.name}>
             <input
-              value={form.name}
-              onChange={set('name')}
+              {...register('name')}
               placeholder="Ej. Mensual, Trimestral, Anual"
               className={input(errors.name)}
             />
@@ -177,8 +168,7 @@ function PlanFormModal({ mode, plan, onClose }) {
 
           <Field label="Descripción" error={errors.description}>
             <textarea
-              value={form.description}
-              onChange={set('description')}
+              {...register('description')}
               rows={2}
               placeholder="Beneficios incluidos (opcional)"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
@@ -186,34 +176,26 @@ function PlanFormModal({ mode, plan, onClose }) {
           </Field>
 
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Precio (MXN)" error={errors.price}>
+            <Field label="Precio" required error={errors.price}>
               <input
                 type="number"
                 step="0.01"
                 min="0"
-                value={form.price}
-                onChange={set('price')}
+                {...register('price')}
                 placeholder="0.00"
                 className={input(errors.price)}
               />
             </Field>
-            <Field label="Duración (días)" error={errors.durationDays}>
+            <Field label="Duración (días)" required error={errors.durationDays}>
               <input
                 type="number"
                 min="1"
-                value={form.durationDays}
-                onChange={set('durationDays')}
+                {...register('durationDays')}
                 placeholder="30"
                 className={input(errors.durationDays)}
               />
             </Field>
           </div>
-
-          {form.durationDays > 0 && (
-            <p className="text-xs text-gray-400">
-              Equivale a aprox. {(form.durationDays / 30).toFixed(1)} mes(es)
-            </p>
-          )}
 
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">
@@ -233,12 +215,14 @@ function PlanFormModal({ mode, plan, onClose }) {
   );
 }
 
-function Field({ label, error, children }) {
+function Field({ label, required, error, children }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
       {children}
-      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+      {error && <p className="text-red-500 text-xs mt-1">{error.message}</p>}
     </div>
   );
 }

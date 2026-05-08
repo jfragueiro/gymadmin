@@ -1,4 +1,7 @@
 import { useState, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   useMembershipsOverview,
   useClientMemberships,
@@ -9,6 +12,18 @@ import {
 } from '../../hooks/useMemberships.js';
 import { formatDate, formatCurrency } from '../../utils/formatters.js';
 import { PAYMENT_METHOD_LABEL } from '../../utils/constants.js';
+
+const assignPlanFormSchema = z.object({
+  planId: z.string().min(1, 'Seleccioná un plan'),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida'),
+});
+
+const registerPaymentFormSchema = z.object({
+  amount: z.coerce.number().positive('El monto debe ser mayor a 0'),
+  method: z.enum(['cash', 'card', 'transfer'], { errorMap: () => ({ message: 'Método inválido' }) }),
+  paymentDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida'),
+  reference: z.string().max(200).optional(),
+});
 
 export default function MembershipsPage() {
   const [search, setSearch] = useState('');
@@ -204,20 +219,19 @@ function ManageClientModal({ client, onClose }) {
 function AssignPlanForm({ clientId, onSuccess }) {
   const { data: plans = [] } = usePlansCatalog();
   const { mutate, isPending, error } = useAssignMembership();
-  const [planId, setPlanId] = useState('');
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(assignPlanFormSchema),
+    defaultValues: { planId: '', startDate: new Date().toISOString().split('T')[0] },
+  });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    mutate({ clientId, planId, startDate }, { onSuccess });
-  };
+  const onSubmit = (data) => mutate({ clientId, ...data }, { onSuccess });
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Plan</label>
-        <select value={planId} onChange={(e) => setPlanId(e.target.value)} required
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label className="block text-sm font-medium text-gray-700 mb-1">Plan <span className="text-red-500">*</span></label>
+        <select {...register('planId')}
+          className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.planId ? 'border-red-400' : 'border-gray-300'}`}>
           <option value="">Seleccionar plan...</option>
           {plans.map((p) => (
             <option key={p.id} value={p.id}>
@@ -225,13 +239,15 @@ function AssignPlanForm({ clientId, onSuccess }) {
             </option>
           ))}
         </select>
+        {errors.planId && <p className="text-red-500 text-xs mt-1">{errors.planId.message}</p>}
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de inicio</label>
-        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de inicio <span className="text-red-500">*</span></label>
+        <input type="date" {...register('startDate')}
+          className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.startDate ? 'border-red-400' : 'border-gray-300'}`} />
+        {errors.startDate && <p className="text-red-500 text-xs mt-1">{errors.startDate.message}</p>}
       </div>
-      {error && <p className="text-red-500 text-sm">Error al asignar plan</p>}
+      {error && <p className="text-red-500 text-sm">{error?.response?.data?.error || 'Error al asignar plan'}</p>}
       <div className="flex justify-end">
         <button type="submit" disabled={isPending}
           className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50">
@@ -244,49 +260,48 @@ function AssignPlanForm({ clientId, onSuccess }) {
 
 function RegisterPaymentForm({ clientId, membershipId, onSuccess }) {
   const { mutate, isPending, error } = useRegisterPayment();
-  const [form, setForm] = useState({
-    amount: '',
-    method: 'cash',
-    reference: '',
-    paymentDate: new Date().toISOString().split('T')[0],
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(registerPaymentFormSchema),
+    defaultValues: {
+      amount: '',
+      method: 'cash',
+      paymentDate: new Date().toISOString().split('T')[0],
+      reference: '',
+    },
   });
 
-  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+  const cls = (err) => `w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${err ? 'border-red-400' : 'border-gray-300'}`;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    mutate({ clientId, membershipId, ...form }, { onSuccess });
-  };
+  const onSubmit = (data) => mutate({ clientId, membershipId, ...data }, { onSuccess });
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Monto (MXN)</label>
-        <input type="number" step="0.01" min="0" value={form.amount} onChange={set('amount')} required placeholder="0.00"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <label className="block text-sm font-medium text-gray-700 mb-1">Monto <span className="text-red-500">*</span></label>
+        <input type="number" step="0.01" min="0" placeholder="0.00" {...register('amount')} className={cls(errors.amount)} />
+        {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount.message}</p>}
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Método</label>
-          <select value={form.method} onChange={set('method')}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Método <span className="text-red-500">*</span></label>
+          <select {...register('method')} className={cls(errors.method)}>
             <option value="cash">Efectivo</option>
             <option value="card">Tarjeta</option>
             <option value="transfer">Transferencia</option>
           </select>
+          {errors.method && <p className="text-red-500 text-xs mt-1">{errors.method.message}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-          <input type="date" value={form.paymentDate} onChange={set('paymentDate')}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <label className="block text-sm font-medium text-gray-700 mb-1">Fecha <span className="text-red-500">*</span></label>
+          <input type="date" {...register('paymentDate')} className={cls(errors.paymentDate)} />
+          {errors.paymentDate && <p className="text-red-500 text-xs mt-1">{errors.paymentDate.message}</p>}
         </div>
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Referencia</label>
-        <input type="text" value={form.reference} onChange={set('reference')} placeholder="Opcional"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <input type="text" placeholder="Opcional" {...register('reference')} className={cls()} />
       </div>
-      {error && <p className="text-red-500 text-sm">Error al registrar pago</p>}
+      {error && <p className="text-red-500 text-sm">{error?.response?.data?.error || 'Error al registrar pago'}</p>}
       <div className="flex justify-end">
         <button type="submit" disabled={isPending}
           className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50">
