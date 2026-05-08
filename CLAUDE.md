@@ -88,6 +88,35 @@ Bot de notificaciones. Flujo: cliente escribe su DNI → bot lo vincula (guarda 
 - Tests unitarios en domain/ y application/ con mocks de Jest (sin BD)
 - Idioma del código: inglés. UI y mensajes de error al usuario: español
 
+## Seguridad — Obligatorio en toda integración
+
+### Validación de inputs en endpoints POST/PUT/PATCH
+- Todo endpoint que reciba body DEBE tener su schema Zod en `adapters/schemas/`
+- El schema se aplica ANTES de llamar al Use Case — nunca pasar `req.body` directo
+- Campos de tipo string: definir longitud máxima (`.max()`) para evitar payloads gigantes
+- Campos numéricos: validar rango con `.min()` / `.max()`
+- Fechas: validar formato con `.regex(/^\d{4}-\d{2}-\d{2}$/)` antes de parsear
+- Enums: usar `z.enum([...])` — nunca aceptar valores arbitrarios
+- Si la validación Zod falla, Express devuelve 400 con el mensaje del error — no llega al Use Case
+
+### Protección contra SQL Injection
+- Usar SIEMPRE los métodos de Knex (`.where({ id })`, `.insert({})`) — NUNCA concatenar strings en queries
+- Prohibido: `` knex.raw(`WHERE id = ${id}`) `` con variables directas
+- Permitido: `knex.raw('WHERE id = ?', [id])` con parámetros posicionales cuando sea necesario
+- Los repositorios son la única capa que toca Knex — ningún controller ni use case construye queries
+
+### Protección contra SSRF (Server-Side Request Forgery)
+- El backend NO debe hacer requests HTTP a URLs que vengan del usuario (body, query params, headers)
+- Si un endpoint necesita hacer fetch externo, la URL debe estar hardcodeada o venir de variables de entorno
+- Nunca pasar `req.body.url`, `req.query.webhook`, ni similares a `fetch()`, `axios.get()` u otras funciones HTTP
+- El webhook de Telegram usa URL configurada en `TELEGRAM_WEBHOOK_SECRET` — no viene del cliente
+
+### Frontend — Validación antes de enviar
+- Todo formulario con POST usa React Hook Form + Zod (`zodResolver`) antes de llamar a la API
+- Campos obligatorios marcados con `required` en el componente `Field` (asterisco rojo visible)
+- El botón submit permanece deshabilitado (`disabled`) hasta que los campos obligatorios estén completos
+- Los errores de la API se muestran usando `error?.response?.data?.error` (clave `error`, no `message`)
+
 ## Referencia completa
 Ver `/Users/joe/Documents/joe/prd/GymAdmin_PRD_v6.0.pdf` para el modelo de datos completo,
 lista de endpoints y especificación de módulos.
